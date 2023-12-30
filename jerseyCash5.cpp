@@ -39,7 +39,7 @@ GameDataStruct fetchGameData(){
         return gameData;
     }
 
-    string url = "https://www.lotteryusa.com/mega-millions/";
+    string url = "https://www.lotteryusa.com/new-jersey/cash-5/";
     string response;
 
     // Set libcurl options
@@ -146,6 +146,24 @@ GameDataStruct fetchGameData(){
     return gameData;
 }
 
+int calculateWinnings(int matches, int jackpot, int xtra){
+
+    if(matches == 5)
+        return jackpot;
+
+    else if(matches == 4)
+        return 500 * xtra;
+
+    else if(matches == 3)
+        return 15 * xtra;
+
+    else if(matches == 2 && xtra > 1)
+        return 2;
+
+    else
+        return 0;
+}
+
 // Function to remove leading and trailing spaces from a string
 void removeLeadingTrailingSpaces(std::string &str) {
     size_t start = 0;
@@ -181,62 +199,28 @@ int extractIntegerWords(const string &input) {
     return extractedInteger;
 }
 
-int calculateWinnings(int matching_white, bool matchesMegaball, int jackpot, int megaplier){
-
-    if(matching_white == 5 && matchesMegaball)
-        return jackpot;
-
-    else if(matching_white == 5)
-        return 1000000 * megaplier;
-
-    else if(matching_white == 4 && matchesMegaball)
-        return 10000 * megaplier;
-
-    else if(matching_white == 4)
-        return 500 * megaplier;
-
-    else if(matching_white == 3 && matchesMegaball)
-        return 200 * megaplier;
-
-    else if(matching_white == 3)
-        return 10 * megaplier;
-
-    else if(matching_white == 2 && matchesMegaball)
-        return 10 * megaplier;
-
-    else if(matching_white == 1 && matchesMegaball)
-        return 4 * megaplier;
-
-    else if(matchesMegaball)
-        return 2 * megaplier;
-
-    else
-        return 0;
-}
-
 string formatWithCommas(int value){
-    string result=to_string(value);
+    string result=std::to_string(value);
     for(int i=result.size()-3; i>0;i-=3)
         result.insert(i,",");
     return result;
 }
 
 int main(){
-    int winning_numbers[6];
+    int winning_numbers[5];
     random_device rd;
     mt19937 gen(rd());
     int play_opt;
     int num_of_plays;
-    char addMegaplier;
-    int megaplier;
-    int matching_white;
-    bool matchesMegaball;
-    int total_winnings = 0;
+    char addXtra;
+    int xtra;
+    int matches;
+    int total_winnings;
     int random_num;
     bool done;
     set<int> chosenWinning;
     char playAgain;
-   
+
     GameDataStruct gameData = fetchGameData();
     string jackpot_string = gameData.currentJackpot;
     string next_draw_date = gameData.nextDrawDate;
@@ -256,62 +240,59 @@ int main(){
         chosenWinning.clear();
         total_winnings = 0;
 
-        cout << "\n\n\nMEGA MILLIONS\n\nNext Draw: " << next_draw_date << " 11:00 pm\nESTIMATED JACKPOT: " << 
+        cout << "\n\n\nJersey Cash 5\n\nNext Draw: " << next_draw_date << " 10:57 pm\nESTIMATED JACKPOT: " << 
             jackpot_string << endl;
 
         //cout << "Extracted Integers from jackpot_string: " << extractIntegerWords(jackpot_string) << endl;
 
-        const int jackpot = extractIntegerWords(jackpot_string) * 1000000;
+        const int jackpot = extractIntegerWords(jackpot_string) * 1000;
 
         //cout << "Jackpot: " << formatWithCommas(jackpot) << "\n" << endl;
 
         //Generate random winning numbers
-        for(int j=0; j<5; j++){ //Generate 5 random numbers between 1 and 70
-            uniform_int_distribution<> distribution(1, 70);
+        for(int i=0; i<5; i++){ //Generate 5 random numbers between 1 and 45
+            uniform_int_distribution<> distribution(1, 45);
             done = false;
             do{
                 random_num = distribution(gen);
                 if (chosenWinning.find(random_num) == chosenWinning.end()) { //Not already chosen
                     chosenWinning.insert(random_num);
-                    winning_numbers[j] = random_num;
+                    winning_numbers[i] = random_num;
                     done = true;
                 }     
             }
             while(!done);
         }
-        //Generate random Megaball number between 1 and 25
-        uniform_int_distribution<> distribution(1, 25);
-        winning_numbers[5] = distribution(gen);
         
-        while (cout << "(1) Quick pick\n(2) Pick my own numbers" << endl && ((!(cin >> play_opt))
+        while (std::cout << "(1) Quick pick\n(2) Pick my own numbers" << endl && ((!(std::cin >> play_opt))
                 || (play_opt != 1 && play_opt != 2))) {
-        cin.clear(); //clear bad input flag
-        cin.ignore(numeric_limits<streamsize>::max(), '\n'); //discard input
-        cout << "\nInvalid input\n";
+        std::cin.clear(); //clear bad input flag
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); //discard input
+        std::cout << "\nInvalid input\n";
         }
 
-        while (cout << "\nHow many plays?" << endl && !(cin >> num_of_plays)) {
-        cin.clear(); //clear bad input flag
-        cin.ignore(numeric_limits<streamsize>::max(), '\n'); //discard input
-        cout << "\nInvalid input\n";
+        while (std::cout << "\nHow many plays?" << endl && !(std::cin >> num_of_plays)) {
+        std::cin.clear(); //clear bad input flag
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); //discard input
+        std::cout << "\nInvalid input\n";
         }
 
         do{
-            cout << "\nWould you like to add Megaplier? (y/n)" << endl;
-            cin >> addMegaplier;
-            if(addMegaplier != 'y' && addMegaplier != 'Y' &&
-                addMegaplier != 'n' && addMegaplier != 'N')
+            cout << "\nWould you like to add Xtra? (y/n)" << endl;
+            cin >> addXtra;
+            if(addXtra != 'y' && addXtra != 'Y' &&
+                addXtra != 'n' && addXtra != 'N')
                 cout << "\nInvalid input\n" << endl;
-            else if(addMegaplier == 'y' || addMegaplier == 'Y'){
+            else if(addXtra == 'y' || addXtra == 'Y'){
                 uniform_int_distribution<> distribution(2, 5);
-                megaplier = distribution(gen);
+                xtra = distribution(gen);
             }
-            else if(addMegaplier == 'n'){
-                megaplier = 1;
+            else if(addXtra == 'n'){
+                xtra = 1;
             }
         }
-        while(addMegaplier != 'y' && addMegaplier != 'Y' &&
-                addMegaplier != 'n' && addMegaplier != 'N');
+        while(addXtra != 'y' && addXtra != 'Y' &&
+                addXtra != 'n' && addXtra != 'N');
 
         //Quick Pick
         if (play_opt == 1){
@@ -319,12 +300,12 @@ int main(){
             cout << "\n\nYour Tickets:\n" << endl;
 
             for(int i=1; i<=num_of_plays; i++){
-                int ticket[6];
+                int ticket[5];
                 int ticket_winnings = 0;
                 set<int> generatedNumbers;
 
-                for(int j=0; j<5; j++){ //Generate 5 random numbers between 1 and 70
-                    uniform_int_distribution<> distribution(1, 70);
+                for(int j=0; j<5; j++){ //Generate 5 random numbers between 1 and 45
+                    uniform_int_distribution<> distribution(1, 45);
                     done = false;
                     do{
                         random_num = distribution(gen);
@@ -337,19 +318,13 @@ int main(){
                     while(!done);
                 }
 
-                //Generate random Megaball number between 1 and 25
-                uniform_int_distribution<> distribution(1, 25);
-                ticket[5] = distribution(gen);
-
                 //Print ticket and calculate winnings
-                matching_white = 0;
-                matchesMegaball = false;
-                
-                for(int num=0; num<5; num++){   //Loop through each white ball in ticket
-                    for(int i=0; i<5; i++){ //Loop through each white winning number
-                        if(ticket[num] == winning_numbers[i]){   //Matching white ball number
-                            cout << "(" << ticket[num] << ")\t";   //Print matching white ball number in surrounding parenthases
-                            matching_white += 1;
+                matches = 0;
+                for(int num=0; num<5; num++){   //Loop through each number in ticket
+                    for(int i=0; i<5; i++){ //Loop through each winning number
+                        if(ticket[num] == winning_numbers[i]){   //Matching number
+                            cout << "(" << ticket[num] << ")\t";   //Print matching number in surrounding parenthases
+                            matches += 1;
                             break;  //Match found; exit the loop
                         }
                         else    //Number in ticket does not match winning number
@@ -357,14 +332,8 @@ int main(){
                                 cout << ticket[num] << "\t";   //Print number without parenthases
                     }
                 }
-                if(ticket[5] == winning_numbers[5]){    //Matching Megaball number
-                    matchesMegaball = true;
-                    cout << "(" << ticket[5] << ")\t"; //Print matching Megaball number in surrounding parenthases
-                }
-                else
-                    cout << ticket[5] << "\t"; //Print Megaball number without parenthases
 
-                ticket_winnings[ticket] = calculateWinnings(matching_white, matchesMegaball, jackpot, megaplier);
+                ticket_winnings[ticket] = calculateWinnings(matches, jackpot, xtra);
 
                 if(ticket_winnings[ticket] != 0)
                     cout << "$" << formatWithCommas(ticket_winnings[ticket]);
@@ -376,7 +345,7 @@ int main(){
 
         //User picks their own numbers
         else{
-            int tickets[num_of_plays][6];
+            int tickets[num_of_plays][5];
             int ticket_winnings[num_of_plays];
             
             for(int i=1; i<=num_of_plays; i++){
@@ -384,13 +353,13 @@ int main(){
                 int user_selected_num;
                 cout << "\n\nTICKET #" << i << "\n----------\n" << endl;
 
-                cout << "Enter 5 numbers between 1 and 70:" << endl;
+                cout << "Enter 5 numbers between 1 and 45:" << endl;
                 for(int j=0; j<5; j++){
                     done = false;
                     do{
                         cin >> user_selected_num;
-                        if((user_selected_num < 1) || (user_selected_num > 70)) // Not in valid range
-                            cout << "\nNumber must be between 1 and 70" << endl;
+                        if((user_selected_num < 1) || (user_selected_num > 45)) // Not in valid range
+                            cout << "\nNumber must be between 1 and 45" << endl;
                         else if(!(chosenNumbers.find(user_selected_num) == chosenNumbers.end()))    // Num already chosen
                             cout << "\nNumber already chosen" << endl;
                         else    //Valid number selection
@@ -402,27 +371,17 @@ int main(){
                     }
                     while(!done);
                 }
-
-                cout << "\nPick 1 Megaball number between 1 and 25:" << endl;
-                do{
-                    cin >> tickets[i-1][5];
-                    if((tickets[i-1][5] < 1) || (tickets[i-1][5] > 25))
-                        cout << "\nNumber must be between 1 and 25" << endl;
-                }
-                while((tickets[i-1][5] < 1) || (tickets[i-1][5] > 25));
             }
 
             //Print each of user's tickets and calculate winnings
             cout << "\n\nYour Tickets:\n" << endl;
             for(int ticket=0; ticket<num_of_plays; ticket++){   //Loop through each of player's tickets
-                matching_white = 0;
-                matchesMegaball = false;
-                
-                for(int num=0; num<5; num++){   //Loop through each white ball in ticket
-                    for(int i=0; i<5; i++){ //Loop through each white winning number
-                        if(tickets[ticket][num] == winning_numbers[i]){   //Matching white ball number
-                            cout << "(" << tickets[ticket][num] << ")\t";   //Print matching white ball number in surrounding parenthases
-                            matching_white += 1;
+                matches = 0;
+                for(int num=0; num<5; num++){   //Loop through each number in ticket
+                    for(int i=0; i<5; i++){ //Loop through each winning number
+                        if(tickets[ticket][num] == winning_numbers[i]){   //Matching number
+                            cout << "(" << tickets[ticket][num] << ")\t";   //Print matching number in surrounding parenthases
+                            matches += 1;
                             break;  //Match found; exit the loop
                         }
                         else    //Number in ticket does not match winning number
@@ -430,14 +389,8 @@ int main(){
                                 cout << tickets[ticket][num] << "\t";   //Print number without parenthases
                     }
                 }
-                if(tickets[ticket][5] == winning_numbers[5]){    //Matching Megaball number
-                    matchesMegaball = true;
-                    cout << "(" << tickets[ticket][5] << ")\t"; //Print matching Megaball number in surrounding parenthases
-                }
-                else
-                    cout << tickets[ticket][5] << "\t"; //Print Megaball number without parenthases
 
-                ticket_winnings[ticket] = calculateWinnings(matching_white, matchesMegaball, jackpot, megaplier);
+                ticket_winnings[ticket] = calculateWinnings(matches, jackpot, xtra);
 
                 if(ticket_winnings[ticket] != 0)
                     cout << "$" << formatWithCommas(ticket_winnings[ticket]);
@@ -448,20 +401,20 @@ int main(){
         }
 
         //Print price of tickets
-        if(megaplier > 1)
-            cout << "\n\nPrice of Tickets: $" << formatWithCommas(3 * num_of_plays) << endl;
-        else
+        if(xtra > 1)
             cout << "\n\nPrice of Tickets: $" << formatWithCommas(2 * num_of_plays) << endl;
+        else
+            cout << "\n\nPrice of Tickets: $" << formatWithCommas(num_of_plays) << endl;
 
         //Print the winning numbers
         cout << "\n\nWinning Numbers:\n" << endl;
-        for(int i=0; i<6; i++){
+        for(int i=0; i<5; i++){
             cout << winning_numbers[i] << "\t";
         }
         cout << endl;
 
-        if(megaplier > 1)
-            cout << "\nMEGAPLIER X" << megaplier << endl;
+        if(xtra > 1)
+            cout << "\nXtra X" << xtra << endl;
 
         if(total_winnings >= jackpot)
             cout << "\n\n\n*** CONGRATULATIONS - YOU WON THE JACKPOT! ***\n\nYour Winnings: $" << formatWithCommas(total_winnings) << endl;
