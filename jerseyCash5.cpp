@@ -164,6 +164,27 @@ int calculateWinnings(int matches, int jackpot, int xtra){
         return 0;
 }
 
+int isSubstring(string s1, string s2)
+{
+    int M = s1.length();
+    int N = s2.length();
+ 
+    /* A loop to slide pat[] one by one */
+    for (int i = 0; i <= N - M; i++) {
+        int j;
+ 
+        /* For current index i, check for pattern match */
+        for (j = 0; j < M; j++)
+            if (s2[i + j] != s1[j])
+                break;
+ 
+        if (j == M)
+            return i;
+    }
+ 
+    return -1;
+}
+
 // Function to remove leading and trailing spaces from a string
 void removeLeadingTrailingSpaces(std::string &str) {
     size_t start = 0;
@@ -183,20 +204,39 @@ void removeLeadingTrailingSpaces(std::string &str) {
     str = str.substr(start, end - start + 1);
 }
 
-int extractIntegerWords(const string &input) {
-    regex reg("(\\d+)");
-    smatch match;
+int extractIntegerWords(const std::string &input) {
+    std::regex reg("(\\d+)");
+    std::smatch match;
 
     // Search for integers in the input string
-    regex_search(input, match, reg);
+    std::regex_search(input, match, reg);
 
     // Convert the matched integer string to an actual integer
     int extractedInteger = 0;
     if (match.size() > 0) {
-        extractedInteger = stoi(match[0]);
+        extractedInteger = std::stoi(match[0]);
     }
 
     return extractedInteger;
+}
+
+double extractDecimalNumbers(const std::string &input) {
+    std::regex reg("(-?\\d+\\.\\d+)");
+    std::smatch match;
+
+    // Search for decimal numbers in the input string
+    std::regex_search(input, match, reg);
+
+    // Convert the matched decimal number string to a double
+    double extractedDecimal = 0.0;
+    if (match.size() > 0) {
+        extractedDecimal = std::stod(match[0]);
+    }
+
+    if(extractedDecimal == 0.0) // No matching decimal number, search for integer instead
+        return extractIntegerWords(input);
+
+    return extractedDecimal;
 }
 
 string formatWithCommas(int value){
@@ -207,6 +247,7 @@ string formatWithCommas(int value){
 }
 
 int main(){
+    int jackpot;
     int winning_numbers[5];
     random_device rd;
     mt19937 gen(rd());
@@ -243,9 +284,12 @@ int main(){
         cout << "\n\n\nJersey Cash 5\n\nNext Draw: " << next_draw_date << " 10:57 pm\nESTIMATED JACKPOT: " << 
             jackpot_string << endl;
 
-        //cout << "Extracted Integers from jackpot_string: " << extractIntegerWords(jackpot_string) << endl;
+        //cout << "Extracted number from jackpot_string: " << extractDecimalNumbers(jackpot_string) << endl;
 
-        const int jackpot = extractIntegerWords(jackpot_string) * 1000;
+        if(! (-1 == isSubstring("Million", jackpot_string)))
+            jackpot = extractDecimalNumbers(jackpot_string) * 1000000;
+        else
+            jackpot = extractDecimalNumbers(jackpot_string) * 1000;
 
         //cout << "Jackpot: " << formatWithCommas(jackpot) << "\n" << endl;
 
