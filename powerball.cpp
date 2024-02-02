@@ -1,5 +1,4 @@
 #include <iostream>
-#include <string>
 #include <random>
 #include <set>
 #include <curl/curl.h>
@@ -164,6 +163,17 @@ void removeLeadingTrailingSpaces(std::string &str) {
 
     // Erase leading and trailing spaces from the string
     str = str.substr(start, end - start + 1);
+
+    // Remove any newlines from the string
+    int n=0;
+    for(int i=0;i<str.length();i++){
+        if(str[i]=='\n' || str[i]=='\t'){
+            n++;
+        }else{
+            str[i-n]=str[i];
+        }
+    }
+    str.resize(str.length()-n);
 }
 
 int calculateWinnings(int matching_white, bool matchesPowerball, int jackpot, int powerPlay){
