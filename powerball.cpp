@@ -167,9 +167,22 @@ void removeLeadingTrailingSpaces(std::string &str) {
     // Remove any newlines from the string
     int n=0;
     for(int i=0;i<str.length();i++){
-        if(str[i]=='\n' || str[i]=='\t'){
+        if (str[i]=='\n'){
+            str[i] = ' '; // replace newline with space
+        }
+        else{
+            str[i-n]=str[i];
+        }
+    }
+    str.resize(str.length()-n);
+
+    // Remove any tabs from the string
+    n=0;
+    for(int i=0;i<str.length();i++){
+        if(str[i]=='\t'){
             n++;
-        }else{
+        }
+        else{
             str[i-n]=str[i];
         }
     }
