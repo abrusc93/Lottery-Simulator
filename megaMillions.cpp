@@ -205,6 +205,46 @@ int extractIntegerWords(const string &input) {
     return extractedInteger;
 }
 
+double extractDecimalNumbers(const std::string &input) {
+    std::regex reg("(-?\\d+\\.\\d+)");
+    std::smatch match;
+
+    // Search for decimal numbers in the input string
+    std::regex_search(input, match, reg);
+
+    // Convert the matched decimal number string to a double
+    double extractedDecimal = 0.0;
+    if (match.size() > 0) {
+        extractedDecimal = std::stod(match[0]);
+    }
+
+    if(extractedDecimal == 0.0) // No matching decimal number, search for integer instead
+        return extractIntegerWords(input);
+
+    return extractedDecimal;
+}
+
+int isSubstring(string s1, string s2)
+{
+    int M = s1.length();
+    int N = s2.length();
+ 
+    /* A loop to slide pat[] one by one */
+    for (int i = 0; i <= N - M; i++) {
+        int j;
+ 
+        /* For current index i, check for pattern match */
+        for (j = 0; j < M; j++)
+            if (s2[i + j] != s1[j])
+                break;
+ 
+        if (j == M)
+            return i;
+    }
+ 
+    return -1;
+}
+
 int calculateWinnings(int matching_white, bool matchesMegaball, int jackpot, int megaplier){
 
     if(matching_white == 5 && matchesMegaball)
@@ -246,6 +286,7 @@ string formatWithCommas(int value){
 }
 
 int main(){
+    int jackpot;
     int winning_numbers[6];
     random_device rd;
     mt19937 gen(rd());
@@ -282,10 +323,13 @@ int main(){
 
         cout << "\n\n\nMEGA MILLIONS\n\nNext Draw: " << next_draw_date << " 11:00 pm\nESTIMATED JACKPOT: " << 
             jackpot_string << endl;
+            
+        //cout << "Extracted number from jackpot_string: " << extractDecimalNumbers(jackpot_string) << endl;
 
-        //cout << "Extracted Integers from jackpot_string: " << extractIntegerWords(jackpot_string) << endl;
-
-        const int jackpot = extractIntegerWords(jackpot_string) * 1000000;
+        if(! (-1 == isSubstring("Billion", jackpot_string)))
+            jackpot = extractDecimalNumbers(jackpot_string) * 1000000000;
+        else
+            jackpot = extractDecimalNumbers(jackpot_string) * 1000000;
 
         //cout << "Jackpot: " << formatWithCommas(jackpot) << "\n" << endl;
 
